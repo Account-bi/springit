@@ -3,7 +3,7 @@ package com.vega.springit.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties("springit") // der prefix springit kann in dem property file verwendet werden
+@ConfigurationProperties(prefix = "springit") // der prefix springit kann in dem property file verwendet werden
 public class SpringitProperties {
 
   /**
