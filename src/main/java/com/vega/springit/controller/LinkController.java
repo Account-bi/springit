@@ -1,55 +1,70 @@
 package com.vega.springit.controller;
 
 
+
 import com.vega.springit.domain.Link;
 import com.vega.springit.repository.LinkRepository;
-import java.util.List;
 import java.util.Optional;
-import org.springframework.web.bind.annotation.DeleteMapping;
+import javax.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-@RestController
-@RequestMapping("/links") //mapped alle requests über links so dass in den Methoden nur noch der spezifische path angegeben weerden muss
+@Controller
 public class LinkController {
 
   private LinkRepository linkRepository;
 
+  private static final Logger logger =  LoggerFactory.getLogger(LinkController.class);
 
   public LinkController(LinkRepository linkRepository) {
-    this.linkRepository=linkRepository;
+    this.linkRepository = linkRepository;
   }
 
   @GetMapping("/")
-  public List<Link> list(){
-    return linkRepository.findAll();
+  public String list(Model model){
+    model.addAttribute("links",linkRepository.findAll());
+
+    return "link/list";
   }
 
-
-  //CRUD
-  @PostMapping("/create")
-  public Link create(@ModelAttribute Link link){
-    return linkRepository.save(link);
+  @GetMapping("/link/{id}")
+  public String read(@PathVariable Long id,Model model) {
+    Optional<Link> link = linkRepository.findById(id);
+    if( link.isPresent() ) {
+      model.addAttribute("link",link.get());
+      model.addAttribute("success",model.containsAttribute("success"));
+      return "link/view";
+    } else {
+      return "redirect:/";
+    }
   }
 
-  // .. soll aufgerufen werden ... links/1 wobei 1 die id ist
-  @GetMapping("/{id}")
-  public Optional<Link> read(@PathVariable Long id){
-    return linkRepository.findById(id);
+  @GetMapping("/link/submit")
+  public String newLinkForm(Model model) {
+    model.addAttribute("link",new Link());
+    return "link/submit";
   }
 
-  @PutMapping("/{id}")
-  public Link update(@PathVariable Long id,@ModelAttribute Link link){
-    return linkRepository.save(link);
-  }
+  @PostMapping("/link/submit")
+  public String createLink(@Valid Link link, BindingResult bindingResult, Model model, RedirectAttributes redirectAttributes) {
 
-  @DeleteMapping("/{id}")
-  public void delete(@PathVariable Long id){
-    linkRepository.deleteById(id);
+    if(bindingResult.hasErrors()){
+        logger.info("Validation errors were found while submitting a new link.");
+        model.addAttribute("link",link);
+        return "/link/submit";
+    }else{
+      //save the link
+      linkRepository.save(link);
+      logger.info("New Link was saved successfully");
+      redirectAttributes.addAttribute("id",link.getId()).addFlashAttribute("success",true); // added ein flash attribute. dieses ist nur für das nächtes template kurzzeitig füt den redirect da. beim neuladen würde dieses wieder weg sein..
+      return "redirect:/link/{id}";
+    }
   }
 }
