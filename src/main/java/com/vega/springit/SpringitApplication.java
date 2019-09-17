@@ -1,18 +1,13 @@
 package com.vega.springit;
 
-import com.vega.springit.config.SpringitProperties;
 import org.ocpsoft.prettytime.PrettyTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @SpringBootApplication
-@EnableConfigurationProperties(SpringitProperties.class)
-@EnableJpaAuditing
 public class SpringitApplication {
 
   private static final Logger log = LoggerFactory.getLogger(SpringitApplication.class);
