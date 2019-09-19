@@ -1,5 +1,10 @@
 package com.vega.springit.security;
 
+
+
+
+
+
 import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -30,10 +35,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         .and()
         .formLogin()
             .loginPage("/login").permitAll()
-            .usernameParameter("email");
-//        .and()
-//            .csrf().disable()
-//            .headers().frameOptions().disable();
+            .usernameParameter("email")
+            .and()
+        .logout();
   }
 
   @Override
