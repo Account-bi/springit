@@ -10,6 +10,7 @@ import java.util.Optional;
 import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -76,6 +77,7 @@ public class LinkController {
     }
   }
 
+  @Secured("ROLE_USER")
   @PostMapping("/link/comments")
   public String addComment(@Valid Comment comment,BindingResult bindingResult){
 
