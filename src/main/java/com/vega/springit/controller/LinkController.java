@@ -2,7 +2,9 @@ package com.vega.springit.controller;
 
 
 
+import com.vega.springit.domain.Comment;
 import com.vega.springit.domain.Link;
+import com.vega.springit.repository.CommentRepository;
 import com.vega.springit.repository.LinkRepository;
 import java.util.Optional;
 import javax.validation.Valid;
@@ -20,11 +22,13 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class LinkController {
 
   private LinkRepository linkRepository;
+  private CommentRepository commentRepository;
 
   private static final Logger logger =  LoggerFactory.getLogger(LinkController.class);
 
-  public LinkController(LinkRepository linkRepository) {
+  public LinkController(LinkRepository linkRepository, CommentRepository commentRepository) {
     this.linkRepository = linkRepository;
+    this.commentRepository = commentRepository;
   }
 
   @GetMapping("/")
@@ -38,7 +42,11 @@ public class LinkController {
   public String read(@PathVariable Long id,Model model) {
     Optional<Link> link = linkRepository.findById(id);
     if( link.isPresent() ) {
-      model.addAttribute("link",link.get());
+      Link currentLink = link.get();
+      Comment comment = new Comment();
+      comment.setLink(currentLink);
+      model.addAttribute("comment",comment);
+      model.addAttribute("link",currentLink);
       model.addAttribute("success",model.containsAttribute("success"));
       return "link/view";
     } else {
@@ -66,5 +74,18 @@ public class LinkController {
       redirectAttributes.addAttribute("id",link.getId()).addFlashAttribute("success",true); // added ein flash attribute. dieses ist nur für das nächtes template kurzzeitig füt den redirect da. beim neuladen würde dieses wieder weg sein..
       return "redirect:/link/{id}";
     }
+  }
+
+  @PostMapping("/link/comments")
+  public String addComment(@Valid Comment comment,BindingResult bindingResult){
+
+    if(bindingResult.hasErrors()){
+      logger.info("There was a problem adding a new comment");
+    }else{
+      commentRepository.save(comment);
+      logger.info("New comment was saved successfully.");
+    }
+
+    return "redirect:/link/"+comment.getLink().getId();
   }
 }
