@@ -1,11 +1,10 @@
 package com.vega.springit.controller;
 
 
-
 import com.vega.springit.domain.Comment;
 import com.vega.springit.domain.Link;
 import com.vega.springit.repository.CommentRepository;
-import com.vega.springit.repository.LinkRepository;
+import com.vega.springit.service.LinkService;
 import java.util.Optional;
 import javax.validation.Valid;
 import org.slf4j.Logger;
@@ -22,26 +21,26 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 public class LinkController {
 
-  private LinkRepository linkRepository;
+  private LinkService linkService;
   private CommentRepository commentRepository;
 
   private static final Logger logger =  LoggerFactory.getLogger(LinkController.class);
 
-  public LinkController(LinkRepository linkRepository, CommentRepository commentRepository) {
-    this.linkRepository = linkRepository;
+  public LinkController(LinkService linkService, CommentRepository commentRepository) {
+    this.linkService = linkService;
     this.commentRepository = commentRepository;
   }
 
   @GetMapping("/")
   public String list(Model model){
-    model.addAttribute("links",linkRepository.findAll());
+    model.addAttribute("links",linkService.findAll());
 
     return "link/list";
   }
 
   @GetMapping("/link/{id}")
   public String read(@PathVariable Long id,Model model) {
-    Optional<Link> link = linkRepository.findById(id);
+    Optional<Link> link = linkService.findById(id);
     if( link.isPresent() ) {
       Link currentLink = link.get();
       Comment comment = new Comment();
@@ -70,7 +69,7 @@ public class LinkController {
         return "/link/submit";
     }else{
       //save the link
-      linkRepository.save(link);
+      linkService.save(link);
       logger.info("New Link was saved successfully");
       redirectAttributes.addAttribute("id",link.getId()).addFlashAttribute("success",true); // added ein flash attribute. dieses ist nur für das nächtes template kurzzeitig füt den redirect da. beim neuladen würde dieses wieder weg sein..
       return "redirect:/link/{id}";
@@ -87,7 +86,6 @@ public class LinkController {
       commentRepository.save(comment);
       logger.info("New comment was saved successfully.");
     }
-
     return "redirect:/link/"+comment.getLink().getId();
   }
 }
